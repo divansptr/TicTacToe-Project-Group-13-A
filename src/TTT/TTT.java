@@ -43,6 +43,7 @@ public class TTT extends JPanel {
     private Seed currentPlayer;  // the current player
     private JLabel statusBar;    // for displaying status message
     private JPanel timerPanel;   // Panel for visual timer representation
+    private JButton restartButton; // restart the game
 
     // Timer-related variables
     private Timer gameTimer;
@@ -100,6 +101,23 @@ public class TTT extends JPanel {
         statusBar.setHorizontalAlignment(JLabel.LEFT);
         statusBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
 
+        // Create the Restart button
+        restartButton = new JButton("Restart");
+        //restartButton.setFont(FONT_STATUS);
+        restartButton.setFont(new Font("OCR A Extended", Font.PLAIN, 13)); // Smaller font for the button
+        restartButton.setMargin(new Insets(1, 4, 1, 4)); // Padding vertikal 2px, horizontal 5px
+        restartButton.setPreferredSize(new Dimension(70, 20)); // Smaller size for the button
+        restartButton.setFocusable(false);
+        restartButton.setBackground(Color.LIGHT_GRAY);
+        restartButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SoundEffect.DIE.play();
+                newGame(); // Reset the game when the button is clicked
+                repaint();
+            }
+        });
+
         // Create visual timer panel
         timerPanel = new JPanel() {
             @Override
@@ -141,10 +159,15 @@ public class TTT extends JPanel {
         timerPanel.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, 20));
         timerPanel.setBackground(Color.LIGHT_GRAY);
 
-        // Create a panel to hold both timer and status
+        // Create a panel for statusBar and restart button
+        JPanel statusPanel = new JPanel(new BorderLayout());
+        statusPanel.add(statusBar, BorderLayout.CENTER);
+        statusPanel.add(restartButton, BorderLayout.EAST);
+
+        // Create a panel to hold both timer and statusPanel
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.add(timerPanel, BorderLayout.NORTH);
-        bottomPanel.add(statusBar, BorderLayout.SOUTH);
+        bottomPanel.add(statusPanel, BorderLayout.SOUTH);
 
         super.setLayout(new BorderLayout());
         super.add(bottomPanel, BorderLayout.PAGE_END);
@@ -205,11 +228,13 @@ public class TTT extends JPanel {
 
     /** Reset the game-board contents and the current-state, ready for new game */
     public void newGame() {
-        for (int row = 0; row < Board.ROWS; ++row) {
+        board.newGame();
+        /*for (int row = 0; row < Board.ROWS; ++row) {
             for (int col = 0; col < Board.COLS; ++col) {
                 board.cells[row][col].content = Seed.NO_SEED; // all cells empty
             }
         }
+         */
         currentPlayer = Seed.CROSS;    // cross plays first
         currentState = State.PLAYING;  // ready to play
 
