@@ -19,7 +19,7 @@ import java.util.TimerTask;
 public class TTT extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private boolean userVsComputer;
+    public boolean userVsComputer;
     private JButton btnUserVsComputer;
     private JButton btnTwoPlayers;
     private boolean isGameModeSelected = false;
