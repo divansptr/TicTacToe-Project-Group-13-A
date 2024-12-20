@@ -111,32 +111,67 @@ public class TTT extends JPanel {
 
         timerPanel = new JPanel() {
             @Override
-            protected void paintComponent(Graphics g) {
+            public void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                int panelWidth = getWidth();
-                int panelHeight = getHeight();
-                double timeRatio = (double) remainingTime / TIME_LIMIT_SECONDS;
-                int timerWidth = (int) (panelWidth * timeRatio);
+                setBackground(COLOR_BG);
 
-                Color timerColor;
-                if (timeRatio > 0.5) {
-                    timerColor = COLOR_TIMER_FULL;
-                } else if (timeRatio > 0.25) {
-                    timerColor = COLOR_TIMER_MEDIUM;
+                // Tentukan warna berdasarkan waktu tersisa
+                if (remainingTime > 5) {
+                    g.setColor(COLOR_TIMER_FULL);
+                } else if (remainingTime > 2) {
+                    g.setColor(COLOR_TIMER_MEDIUM);
                 } else {
-                    timerColor = COLOR_TIMER_LOW;
+                    g.setColor(COLOR_TIMER_LOW);
                 }
 
-                g.setColor(timerColor);
-                g.fillRect(0, 0, timerWidth, panelHeight);
+                // Gambar bar timer
+                int barWidth = (getWidth() * remainingTime) / TIME_LIMIT_SECONDS;
+                g.fillRect(0, 0, barWidth, getHeight());
 
+                // Tampilkan waktu tersisa
                 g.setColor(Color.BLACK);
-                g.setFont(new Font("Arial", Font.BOLD, 12));
-                String timeText = remainingTime + "s";
+                g.setFont(new Font("Roboto", Font.BOLD, 16));
+                String timeText = "Time Left: " + remainingTime + "s";
                 FontMetrics fm = g.getFontMetrics();
-                int textX = (panelWidth - fm.stringWidth(timeText)) / 2;
-                int textY = (panelHeight + fm.getAscent() - fm.getDescent()) / 2;
-                g.drawString(timeText, textX, textY);
+                int textWidth = fm.stringWidth(timeText);
+                int textHeight = fm.getAscent();
+                g.drawString(timeText, (getWidth() - textWidth) / 2, (getHeight() + textHeight) / 2);
+            };
+
+
+        private void showEndGameDialog() {
+                int choice = JOptionPane.showConfirmDialog(
+                        this,
+                        "Do you want to play again?",
+                        "Game Over",
+                        JOptionPane.YES_NO_OPTION
+                );
+
+                if (choice == JOptionPane.YES_OPTION) {
+                    // Tampilkan pilihan mode permainan
+                    Object[] options = {"User vs Computer", "2 Players"};
+                    int modeChoice = JOptionPane.showOptionDialog(
+                            this,
+                            "Choose game mode:",
+                            "Select Mode",
+                            JOptionPane.DEFAULT_OPTION,
+                            JOptionPane.INFORMATION_MESSAGE,
+                            null,
+                            options,
+                            options[0]
+                    );
+
+                    if (modeChoice == 0) {
+                        userVsComputer = true;
+                    } else if (modeChoice == 1) {
+                        userVsComputer = false;
+                    }
+
+                    isGameModeSelected = true;
+                    newGame(); // Mulai permainan baru
+                } else {
+                    System.exit(0); // Keluar dari sistem
+                }
             }
         };
         timerPanel.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, 20));
@@ -266,7 +301,7 @@ public class TTT extends JPanel {
 
         if (currentState == State.PLAYING) {
             statusBar.setForeground(Color.BLACK);
-            statusBar.setText((currentPlayer == Seed.CROSS) ? "X's Turn" : "O's Turn");
+            statusBar.setText((currentPlayer == Seed.CROSS) ? "Cat's Turn" : "Dog's Turn");
         } else if (currentState == State.DRAW) {
             statusBar.setForeground(Color.RED);
             statusBar.setText("It's a Draw! Click to play again.");
@@ -274,12 +309,12 @@ public class TTT extends JPanel {
             SoundEffect.DRAW.play();
         } else if (currentState == State.CROSS_WON) {
             statusBar.setForeground(Color.RED);
-            statusBar.setText("'X' Won! Click to play again.");
+            statusBar.setText("Cat Won! Click to play again.");
             stopTimer();
             SoundEffect.YEAY.play();
         } else if (currentState == State.NOUGHT_WON) {
             statusBar.setForeground(Color.RED);
-            statusBar.setText("'O' Won! Click to play again.");
+            statusBar.setText("Dog Won! Click to play again.");
             stopTimer();
             SoundEffect.YEAY.play();
         }
