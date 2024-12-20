@@ -67,6 +67,9 @@ public class TTT extends JPanel {
                             SoundEffect.NOUGHT.play();
                         }
 
+                        // Reset waktu
+                        remainingTime = TIME_LIMIT_SECONDS;
+
                         repaint();
 
                         if (currentState == State.PLAYING) {
@@ -226,7 +229,11 @@ public class TTT extends JPanel {
             int row = move[0];
             int col = move[1];
             currentState = board.stepGame(currentPlayer, row, col);
+
+            // Mainkan efek suara dan reset waktu
             SoundEffect.NOUGHT.play();
+            remainingTime = TIME_LIMIT_SECONDS;
+
             repaint();
             currentPlayer = Seed.CROSS;
         }
