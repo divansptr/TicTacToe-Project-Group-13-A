@@ -11,9 +11,20 @@ public class WelcomeScreen {
             frame.setSize(400, 300);
             frame.setLocationRelativeTo(null);
 
+            // Membaca gambar dan menyesuaikan ukurannya agar pas dengan ukuran frame
+            ImageIcon originalIcon = new ImageIcon("src/images/bg2.jpg");
+            Image img = originalIcon.getImage(); // Mengambil objek Image dari ImageIcon
+            Image scaledImg = img.getScaledInstance(frame.getWidth(), frame.getHeight(), Image.SCALE_SMOOTH); // Menyesuaikan ukuran gambar
+            ImageIcon scaledIcon = new ImageIcon(scaledImg); // Membuat ImageIcon baru dari gambar yang sudah disesuaikan ukurannya
+
+            // Membuat label background dengan gambar yang sudah disesuaikan ukurannya
+            JLabel backgroundLabel = new JLabel(scaledIcon);
+            backgroundLabel.setLayout(new BorderLayout());
+            frame.setContentPane(backgroundLabel); // Menetapkan gambar sebagai background
+
             JPanel panel = new JPanel();
             panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-            panel.setBackground(Color.WHITE);
+            panel.setOpaque(false); // Agar panel transparan dan background terlihat
 
             JLabel titleLabel = new JLabel("Welcome to Tic Tac Toe");
             titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -52,13 +63,17 @@ public class WelcomeScreen {
 
             exitButton.addActionListener(e -> System.exit(0));
 
+            // Menambahkan elemen UI ke panel
             panel.add(titleLabel);
             panel.add(Box.createRigidArea(new Dimension(0, 20)));
             panel.add(startButton);
             panel.add(Box.createRigidArea(new Dimension(0, 10)));
             panel.add(exitButton);
 
-            frame.setContentPane(panel);
+            // Menambahkan panel ke backgroundLabel
+            backgroundLabel.add(panel, BorderLayout.CENTER);
+
+            // Menampilkan frame dengan background gambar
             frame.setVisible(true);
         });
     }
