@@ -12,7 +12,10 @@ package TTT;
 
 import java.awt.*;
 import java.awt.event.*;
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -25,11 +28,13 @@ public class TTT extends JPanel {
     private boolean isGameModeSelected = false;
 
     public static final String TITLE = "Tic Tac Toe";
-    public static final Color COLOR_BG = Color.WHITE;
+    //public static final Color COLOR_BG = Color.WHITE;
     public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
     public static final Color COLOR_CROSS = new Color(239, 105, 80);
     public static final Color COLOR_NOUGHT = new Color(64, 154, 225);
     public static final Font FONT_STATUS = new Font("OCR A Extended", Font.PLAIN, 14);
+
+    private Image backgroundImage;
 
     private static final int TIME_LIMIT_SECONDS = 10;
     private static final Color COLOR_TIMER_FULL = new Color(76, 175, 80);
@@ -48,6 +53,13 @@ public class TTT extends JPanel {
     private TimerTask currentTimerTask;
 
     public TTT() {
+        // Load the background image
+        try {
+            backgroundImage = ImageIO.read(new File("src/images/bg2.jpg")); // Update the path to your image
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         super.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -113,7 +125,15 @@ public class TTT extends JPanel {
             @Override
             public void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                setBackground(COLOR_BG);
+                //setBackground(COLOR_BG);
+
+                // Draw background image if it exists
+                if (backgroundImage != null) {
+                    //g.drawImage(backgroundImage, 0, 0, this);  // Draw image at (0, 0) with current JPanel's size
+                    g.drawImage(backgroundImage, 0, 0, Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT, null);
+                } else {
+                    setBackground(Color.BLACK); // Fallback color in case image is not loaded
+                }
 
                 // Tentukan warna berdasarkan waktu tersisa
                 if (remainingTime > 5) {
@@ -296,7 +316,16 @@ public class TTT extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        setBackground(COLOR_BG);
+        //setBackground(COLOR_BG);
+
+        // Draw background image if it exists
+        if (backgroundImage != null) {
+            //g.drawImage(backgroundImage, 0, 0, this);  // Draw image at (0, 0) with current JPanel's size
+            g.drawImage(backgroundImage, 0, 0, Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT, null);
+        } else {
+            setBackground(Color.BLACK); // Fallback color in case image is not loaded
+        }
+
         board.paint(g);
 
         if (currentState == State.PLAYING) {
