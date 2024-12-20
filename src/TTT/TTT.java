@@ -1,13 +1,3 @@
-/**
- * ES234317-Algorithm and Data Structures
- * Semester Ganjil, 2024/2025
- * Group Capstone Project
- * Group #13
- * 1- 5026231020- Diva Nesia Putri
- * 2- 5026231114- Imanuel Dwi Prasetyo
- * 3- 5026231196- Ni Kadek Adelia Paramita Putri
- */
-
 package TTT;
 
 import java.awt.*;
@@ -16,83 +6,68 @@ import javax.swing.*;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/**
- * Tic-Tac-Toe: Two-player Graphic version with better OO design.
- * The tictactoe.Board and tictactoe.Cell classes are separated in their own classes.
- */
 public class TTT extends JPanel {
-    private static final long serialVersionUID = 1L; // to prevent serializable warning
+    private static final long serialVersionUID = 1L;
 
-    // Define named constants for the drawing graphics
+    private boolean userVsComputer;
+    private JButton btnUserVsComputer;
+    private JButton btnTwoPlayers;
+
     public static final String TITLE = "Tic Tac Toe";
     public static final Color COLOR_BG = Color.WHITE;
     public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
-    public static final Color COLOR_CROSS = new Color(239, 105, 80);  // Red #EF6950
-    public static final Color COLOR_NOUGHT = new Color(64, 154, 225); // Blue #409AE1
+    public static final Color COLOR_CROSS = new Color(239, 105, 80);
+    public static final Color COLOR_NOUGHT = new Color(64, 154, 225);
     public static final Font FONT_STATUS = new Font("OCR A Extended", Font.PLAIN, 14);
 
-    // Timer constants
     private static final int TIME_LIMIT_SECONDS = 10;
-    private static final Color COLOR_TIMER_FULL = new Color(76, 175, 80); // Green
-    private static final Color COLOR_TIMER_MEDIUM = new Color(255, 152, 0); // Orange
-    private static final Color COLOR_TIMER_LOW = new Color(244, 67, 54); // Red
+    private static final Color COLOR_TIMER_FULL = new Color(76, 175, 80);
+    private static final Color COLOR_TIMER_MEDIUM = new Color(255, 152, 0);
+    private static final Color COLOR_TIMER_LOW = new Color(244, 67, 54);
 
-    // Define game objects
-    private Board board;         // the game board
-    private State currentState;  // the current state of the game
-    private Seed currentPlayer;  // the current player
-    private JLabel statusBar;    // for displaying status message
-    private JPanel timerPanel;   // Panel for visual timer representation
-    private JButton restartButton; // restart the game
+    private Board board;
+    private State currentState;
+    private Seed currentPlayer;
+    private JLabel statusBar;
+    private JPanel timerPanel;
+    private JButton restartButton;
 
-    // Timer-related variables
     private Timer gameTimer;
     private int remainingTime;
     private TimerTask currentTimerTask;
 
-    /** Constructor to setup the UI and game components */
     public TTT() {
-        // This JPanel fires MouseEvent
         super.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {  // mouse-clicked handler
+            public void mouseClicked(MouseEvent e) {
                 int mouseX = e.getX();
                 int mouseY = e.getY();
-                // Get the row and column clicked
                 int row = mouseY / Cell.SIZE;
                 int col = mouseX / Cell.SIZE;
 
                 if (currentState == State.PLAYING) {
                     if (row >= 0 && row < Board.ROWS && col >= 0 && col < Board.COLS
                             && board.cells[row][col].content == Seed.NO_SEED) {
-                        // Update cells[][] and return the new game state after the move
                         currentState = board.stepGame(currentPlayer, row, col);
-                        // Play the different sound effect
-                        if (currentPlayer == Seed.CROSS) {
-                            SoundEffect.CROSS.play();
-                        } else {
-                            SoundEffect.NOUGHT.play();
+
+                        SoundEffect.CROSS.play();
+                        repaint();
+
+                        if (currentState == State.PLAYING) {
+                            currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
+
+                            if (userVsComputer && currentPlayer == Seed.NOUGHT) {
+                                computerMove();
+                            }
                         }
-
-                        // Stop the current timer
-                        stopTimer();
-
-                        // Switch player
-                        currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
-
-                        // Start timer for new player
-                        startTimer();
                     }
-                } else {        // game over
-                    newGame();  // restart the game
+                } else {
+                    newGame();
                     SoundEffect.DIE.play();
                 }
-                // Refresh the drawing canvas
-                repaint();  // Callback paintComponent().
             }
         });
 
-        // Setup the status bar (JLabel) to display status message
         statusBar = new JLabel();
         statusBar.setFont(FONT_STATUS);
         statusBar.setBackground(COLOR_BG_STATUS);
@@ -101,38 +76,27 @@ public class TTT extends JPanel {
         statusBar.setHorizontalAlignment(JLabel.LEFT);
         statusBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
 
-        // Create the Restart button
         restartButton = new JButton("Restart");
-        //restartButton.setFont(FONT_STATUS);
-        restartButton.setFont(new Font("OCR A Extended", Font.PLAIN, 13)); // Smaller font for the button
-        restartButton.setMargin(new Insets(1, 4, 1, 4)); // Padding vertikal 2px, horizontal 5px
-        restartButton.setPreferredSize(new Dimension(70, 20)); // Smaller size for the button
+        restartButton.setFont(new Font("OCR A Extended", Font.PLAIN, 13));
+        restartButton.setMargin(new Insets(1, 4, 1, 4));
+        restartButton.setPreferredSize(new Dimension(70, 20));
         restartButton.setFocusable(false);
         restartButton.setBackground(Color.LIGHT_GRAY);
-        restartButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                SoundEffect.DIE.play();
-                newGame(); // Reset the game when the button is clicked
-                repaint();
-            }
+        restartButton.addActionListener(e -> {
+            SoundEffect.DIE.play();
+            newGame();
+            repaint();
         });
 
-        // Create visual timer panel
         timerPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-
-                // Calculate timer visualization
                 int panelWidth = getWidth();
                 int panelHeight = getHeight();
-
-                // Calculate width based on remaining time
                 double timeRatio = (double) remainingTime / TIME_LIMIT_SECONDS;
                 int timerWidth = (int) (panelWidth * timeRatio);
 
-                // Choose color based on remaining time
                 Color timerColor;
                 if (timeRatio > 0.5) {
                     timerColor = COLOR_TIMER_FULL;
@@ -142,11 +106,9 @@ public class TTT extends JPanel {
                     timerColor = COLOR_TIMER_LOW;
                 }
 
-                // Draw timer bar
                 g.setColor(timerColor);
                 g.fillRect(0, 0, timerWidth, panelHeight);
 
-                // Draw time text
                 g.setColor(Color.BLACK);
                 g.setFont(new Font("Arial", Font.BOLD, 12));
                 String timeText = remainingTime + "s";
@@ -159,34 +121,49 @@ public class TTT extends JPanel {
         timerPanel.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, 20));
         timerPanel.setBackground(Color.LIGHT_GRAY);
 
-        // Create a panel for statusBar and restart button
+        btnUserVsComputer = new JButton("User vs Computer");
+        btnTwoPlayers = new JButton("2 Players");
+
+        btnUserVsComputer.addActionListener(e -> {
+            userVsComputer = true;
+            newGame();
+        });
+
+        btnTwoPlayers.addActionListener(e -> {
+            userVsComputer = false;
+            newGame();
+        });
+
+        JPanel modePanel = new JPanel();
+        modePanel.add(btnUserVsComputer);
+        modePanel.add(btnTwoPlayers);
+
         JPanel statusPanel = new JPanel(new BorderLayout());
         statusPanel.add(statusBar, BorderLayout.CENTER);
         statusPanel.add(restartButton, BorderLayout.EAST);
 
-        // Create a panel to hold both timer and statusPanel
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.add(timerPanel, BorderLayout.NORTH);
         bottomPanel.add(statusPanel, BorderLayout.SOUTH);
 
         super.setLayout(new BorderLayout());
+        super.add(modePanel, BorderLayout.NORTH);
         super.add(bottomPanel, BorderLayout.PAGE_END);
         super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 50));
         super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
 
-        // Set up Game
         initGame();
         newGame();
     }
 
-    /** Initialize the game (run once) */
-    public void initGame() {
-        board = new Board();  // allocate the game-board
+    private void initGame() {
+        board = new Board();
+        currentState = State.PLAYING;
+        currentPlayer = Seed.CROSS;
         gameTimer = new Timer();
     }
 
     private void startTimer() {
-        stopTimer();
         remainingTime = TIME_LIMIT_SECONDS;
 
         currentTimerTask = new TimerTask() {
@@ -198,19 +175,10 @@ public class TTT extends JPanel {
                     timerPanel.repaint();
 
                     if (remainingTime <= 0) {
-                        // Switch player due to time out
                         currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
-
-                        // Stop current timer
                         stopTimer();
-
-                        // Start timer for new player
                         startTimer();
-
-                        // Play sound effect
                         SoundEffect.DIE.play();
-
-                        // Repaint to update status
                         repaint();
                     }
                 });
@@ -226,32 +194,34 @@ public class TTT extends JPanel {
         }
     }
 
-    /** Reset the game-board contents and the current-state, ready for new game */
     public void newGame() {
+        board = new Board();
         board.newGame();
-        /*for (int row = 0; row < Board.ROWS; ++row) {
-            for (int col = 0; col < Board.COLS; ++col) {
-                board.cells[row][col].content = Seed.NO_SEED; // all cells empty
-            }
-        }
-         */
-        currentPlayer = Seed.CROSS;    // cross plays first
-        currentState = State.PLAYING;  // ready to play
-
-        // Reset and start timer
+        currentState = State.PLAYING;
+        currentPlayer = Seed.CROSS;
         stopTimer();
         startTimer();
+        repaint();
     }
 
-    /** Custom painting codes on this JPanel */
+    public void computerMove() {
+        if (userVsComputer) {
+            int[] move = new AIPlayerMinimax(board).move(); // Placeholder for a real AI move
+            int row = move[0];
+            int col = move[1];
+            currentState = board.stepGame(currentPlayer, row, col);
+            SoundEffect.NOUGHT.play();
+            repaint();
+            currentPlayer = Seed.CROSS;
+        }
+    }
+
     @Override
-    public void paintComponent(Graphics g) {  // Callback via repaint()
+    public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        setBackground(COLOR_BG); // set its background color
+        setBackground(COLOR_BG);
+        board.paint(g);
 
-        board.paint(g);  // ask the game board to paint itself
-
-        // Print status-bar message
         if (currentState == State.PLAYING) {
             statusBar.setForeground(Color.BLACK);
             statusBar.setText((currentPlayer == Seed.CROSS) ? "X's Turn" : "O's Turn");
@@ -273,19 +243,14 @@ public class TTT extends JPanel {
         }
     }
 
-    /** The entry "main" method */
     public static void play() {
-        // Run GUI construction codes in Event-Dispatching thread for thread safety
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                JFrame frame = new JFrame(TITLE);
-                // Set the content-pane of the JFrame to an instance of main JPanel
-                frame.setContentPane(new TTT());
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.pack();
-                frame.setLocationRelativeTo(null); // center the application window
-                frame.setVisible(true);            // show it
-            }
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame(TITLE);
+            frame.setContentPane(new TTT());
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
         });
     }
 }
