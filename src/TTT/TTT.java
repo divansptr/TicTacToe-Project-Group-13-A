@@ -304,17 +304,17 @@ public class TTT extends JPanel {
             statusBar.setText((currentPlayer == Seed.CROSS) ? "Cat's Turn" : "Dog's Turn");
         } else if (currentState == State.DRAW) {
             statusBar.setForeground(Color.RED);
-            statusBar.setText("It's a Draw! Click to play again.");
+            statusBar.setText("It's a Draw! Click to play again");
             stopTimer();
             SoundEffect.DRAW.play();
         } else if (currentState == State.CROSS_WON) {
             statusBar.setForeground(Color.RED);
-            statusBar.setText("Cat Won! Click to play again.");
+            statusBar.setText("Cat Won! Click to play again");
             stopTimer();
             SoundEffect.YEAY.play();
         } else if (currentState == State.NOUGHT_WON) {
             statusBar.setForeground(Color.RED);
-            statusBar.setText("Dog Won! Click to play again.");
+            statusBar.setText("Dog Won! Click to play again");
             stopTimer();
             SoundEffect.YEAY.play();
         }
