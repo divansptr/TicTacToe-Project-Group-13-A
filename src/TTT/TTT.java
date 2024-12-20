@@ -1,3 +1,13 @@
+/**
+ * ES234317-Algorithm and Data Structures
+ * Semester Ganjil, 2024/2025
+ * Group Capstone Project
+ * Group #13
+ * 1- 5026231020- Diva Nesia Putri
+ * 2- 5026231114- Imanuel Dwi Prasetyo
+ * 3- 5026231196- Ni Kadek Adelia Paramita Putri
+ */
+
 package TTT;
 
 import java.awt.*;
@@ -50,7 +60,13 @@ public class TTT extends JPanel {
                             && board.cells[row][col].content == Seed.NO_SEED) {
                         currentState = board.stepGame(currentPlayer, row, col);
 
-                        SoundEffect.CROSS.play();
+                        // Mainkan efek suara sesuai giliran pemain
+                        if (currentPlayer == Seed.CROSS) {
+                            SoundEffect.CROSS.play();
+                        } else {
+                            SoundEffect.NOUGHT.play();
+                        }
+
                         repaint();
 
                         if (currentState == State.PLAYING) {
