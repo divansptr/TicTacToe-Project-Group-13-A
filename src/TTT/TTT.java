@@ -22,6 +22,7 @@ public class TTT extends JPanel {
     private boolean userVsComputer;
     private JButton btnUserVsComputer;
     private JButton btnTwoPlayers;
+    private boolean isGameModeSelected = false;
 
     public static final String TITLE = "Tic Tac Toe";
     public static final Color COLOR_BG = Color.WHITE;
@@ -75,6 +76,7 @@ public class TTT extends JPanel {
                         if (currentState == State.PLAYING) {
                             currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
 
+                            // Jika mode User vs Computer dan giliran komputer, lakukan langkah dengan delay
                             if (userVsComputer && currentPlayer == Seed.NOUGHT) {
                                 computerMove();
                             }
@@ -145,11 +147,13 @@ public class TTT extends JPanel {
 
         btnUserVsComputer.addActionListener(e -> {
             userVsComputer = true;
+            isGameModeSelected = true;
             newGame();
         });
 
         btnTwoPlayers.addActionListener(e -> {
             userVsComputer = false;
+            isGameModeSelected = true;
             newGame();
         });
 
@@ -219,23 +223,38 @@ public class TTT extends JPanel {
         currentState = State.PLAYING;
         currentPlayer = Seed.CROSS;
         stopTimer();
-        startTimer();
+        if (isGameModeSelected) {
+            startTimer();
+        }
         repaint();
     }
 
     public void computerMove() {
         if (userVsComputer) {
-            int[] move = new AIPlayerMinimax(board).move(); // Placeholder for a real AI move
-            int row = move[0];
-            int col = move[1];
-            currentState = board.stepGame(currentPlayer, row, col);
+            // Gunakan Timer untuk menunda langkah komputer selama 3 detik
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    // Lakukan langkah komputer hanya jika permainan masih berlangsung
+                    if (currentState == State.PLAYING && currentPlayer == Seed.NOUGHT) {
+                        int[] move = new AIPlayerMinimax(board).move(); // Placeholder for langkah AI
+                        int row = move[0];
+                        int col = move[1];
+                        currentState = board.stepGame(currentPlayer, row, col);
 
-            // Mainkan efek suara dan reset waktu
-            SoundEffect.NOUGHT.play();
-            remainingTime = TIME_LIMIT_SECONDS;
+                        // Mainkan efek suara dan reset waktu
+                        SoundEffect.NOUGHT.play();
+                        remainingTime = TIME_LIMIT_SECONDS;
 
-            repaint();
-            currentPlayer = Seed.CROSS;
+                        SwingUtilities.invokeLater(() -> {
+                            repaint();
+                            if (currentState == State.PLAYING) {
+                                currentPlayer = Seed.CROSS;
+                            }
+                        });
+                    }
+                }
+            }, 3000); // 3000 ms = 3 detik
         }
     }
 
