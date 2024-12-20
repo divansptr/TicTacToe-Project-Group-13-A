@@ -47,6 +47,7 @@ public class TTT extends JPanel {
     private JLabel statusBar;
     private JPanel timerPanel;
     private JButton restartButton;
+    private BGM bgm;
 
     private Timer gameTimer;
     private int remainingTime;
@@ -59,6 +60,11 @@ public class TTT extends JPanel {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        bgm = new BGM("src/audio/bgm-ttt.wav");
+        bgm.play();
+
+        board = new Board();
 
         super.addMouseListener(new MouseAdapter() {
             @Override
